@@ -370,6 +370,7 @@ def open_availability_window():
 # Tkinter UI setup
 root = tk.Tk()
 root.title("Smart Activity Planner")
+root.resizable(False, False)
 
 tk.Label(root, text="Description").grid(row=0, column=0, padx=15, pady=10, sticky=tk.W)
 tk.Label(root, text="Deadline").grid(row=1, column=0, padx=15, pady=10, sticky=tk.W)
