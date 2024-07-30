@@ -21,6 +21,7 @@ DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturda
 daily_availability = {}
 tasks = []
 
+
 # Generate realistic training data
 def generate_realistic_data(num_samples=1000):
     np.random.seed(42)
@@ -41,6 +42,7 @@ def generate_realistic_data(num_samples=1000):
 
     return data
 
+
 # Data Preparation
 def prepare_data(data):
     features = data[['tasks', 'deadlines', 'priorities', 'time_needed']]
@@ -56,10 +58,12 @@ def prepare_data(data):
 
     return scaled_data, feature_scaler, target_scaler
 
+
 # Prepare and split data
 realistic_data = generate_realistic_data()
 scaled_data, feature_scaler, target_scaler = prepare_data(realistic_data)
 train_data, test_data = train_test_split(scaled_data, test_size=0.2, random_state=42)
+
 
 # Build and train the model
 def build_and_train_model(train_data):
@@ -75,7 +79,9 @@ def build_and_train_model(train_data):
 
     return model
 
+
 model = build_and_train_model(train_data)
+
 
 def predict_task_time_slot(new_task):
     scaled_new_task = feature_scaler.transform(new_task)
@@ -83,10 +89,12 @@ def predict_task_time_slot(new_task):
     predicted_time_slot = target_scaler.inverse_transform(predicted_scaled_time_slot)
     return predicted_time_slot
 
+
 def format_time_slot(hours):
     whole_hours = int(hours)
     minutes = int((hours - whole_hours) * 60)
     return f"{whole_hours} hours and {minutes} minutes"
+
 
 def generate_schedule(tasks, daily_availability):
     schedule = []
@@ -122,6 +130,7 @@ def generate_schedule(tasks, daily_availability):
 
     return schedule
 
+
 def add_task():
     try:
         deadline_date = deadline_entry.get_date()
@@ -138,7 +147,8 @@ def add_task():
         new_task = np.array([[new_task_id, deadline, priority, time_needed]])
         predicted_time_slot = predict_task_time_slot(new_task)[0][0]
         tasks.append((new_task_id, deadline, priority, time_needed, predicted_time_slot, description))
-        tasks_listbox.insert(tk.END, f"Task {new_task_id}: {description} | Time Needed: {format_time_slot(time_needed)} | Predicted Time Slot: {format_time_slot(predicted_time_slot)}")
+        tasks_listbox.insert(tk.END,
+                             f"Task {new_task_id}: {description} | Time Needed: {format_time_slot(time_needed)} | Predicted Time Slot: {format_time_slot(predicted_time_slot)}")
         save_tasks_to_file()
 
         deadline_entry.set_date(datetime.now())
@@ -149,6 +159,7 @@ def add_task():
         messagebox.showerror("Input Error", f"Invalid input: {ve}")
     except Exception as e:
         messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+
 
 def open_modify_window(selected_task):
     modify_window = tk.Toplevel(root)
@@ -171,7 +182,7 @@ def open_modify_window(selected_task):
     mod_deadline_entry.grid(row=1, column=1, padx=15, pady=10)
     mod_deadline_entry.set_date(datetime.now() + timedelta(days=deadline))
     mod_priority_combobox.grid(row=2, column=1, padx=15, pady=10)
-    mod_priority_combobox.set(list(PRIORITY_MAP.keys())[priority-1])
+    mod_priority_combobox.set(list(PRIORITY_MAP.keys())[priority - 1])
     mod_time_needed_entry.grid(row=3, column=1, padx=15, pady=10)
     mod_time_needed_entry.insert(0, str(time_needed))
 
@@ -189,9 +200,11 @@ def open_modify_window(selected_task):
 
             new_task = np.array([[task_id, new_deadline, new_priority, new_time_needed]])
             new_predicted_time_slot = predict_task_time_slot(new_task)[0][0]
-            tasks[index] = (task_id, new_deadline, new_priority, new_time_needed, new_predicted_time_slot, new_description)
+            tasks[index] = (
+            task_id, new_deadline, new_priority, new_time_needed, new_predicted_time_slot, new_description)
             tasks_listbox.delete(index)
-            tasks_listbox.insert(index, f"Task {task_id}: {new_description} | Time Needed: {format_time_slot(new_time_needed)} | Predicted Time Slot: {format_time_slot(new_predicted_time_slot)}")
+            tasks_listbox.insert(index,
+                                 f"Task {task_id}: {new_description} | Time Needed: {format_time_slot(new_time_needed)} | Predicted Time Slot: {format_time_slot(new_predicted_time_slot)}")
             save_tasks_to_file()
             modify_window.destroy()
         except ValueError as ve:
@@ -200,6 +213,7 @@ def open_modify_window(selected_task):
             messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
     tk.Button(modify_window, text='Update', command=update_task).grid(row=5, column=0, columnspan=2, pady=15)
+
 
 def modify_task():
     try:
@@ -216,6 +230,7 @@ def modify_task():
     except Exception as e:
         messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
+
 def remove_task():
     try:
         selected_task_index = tasks_listbox.curselection()
@@ -230,6 +245,7 @@ def remove_task():
     except Exception as e:
         messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
+
 def generate_daily_schedule():
     try:
         if not daily_availability:
@@ -243,7 +259,8 @@ def generate_daily_schedule():
             end_hour, end_minute = divmod(end_time, 60)
             if task_id not in grouped_tasks:
                 grouped_tasks[task_id] = {'description': description, 'slots': []}
-            grouped_tasks[task_id]['slots'].append(f"{day_name} ({date}): {start_hour:02}:{start_minute:02} - {end_hour:02}:{end_minute:02}")
+            grouped_tasks[task_id]['slots'].append(
+                f"{day_name} ({date}): {start_hour:02}:{start_minute:02} - {end_hour:02}:{end_minute:02}")
 
         schedule_text = ""
         for task_id, details in grouped_tasks.items():
@@ -258,6 +275,7 @@ def generate_daily_schedule():
     except Exception as e:
         messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
+
 def show_schedule_window(schedule_text):
     schedule_window = tk.Toplevel(root)
     schedule_window.title("Daily Schedule")
@@ -267,12 +285,14 @@ def show_schedule_window(schedule_text):
     schedule_text_box.pack(expand=True, fill=tk.BOTH)
     tk.Button(schedule_window, text='Close', command=schedule_window.destroy).pack(pady=10)
 
+
 def save_tasks_to_file():
     with open(TASKS_CSV, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Task ID', 'Deadline', 'Priority', 'Time Needed', 'Predicted Time Slot', 'Description'])
         for task in tasks:
             writer.writerow(task)
+
 
 def load_tasks_from_file():
     if os.path.exists(TASKS_CSV):
@@ -281,8 +301,11 @@ def load_tasks_from_file():
             next(reader)
             for row in reader:
                 task_id, deadline, priority, time_needed, predicted_time_slot, description = row
-                tasks.append((int(task_id), int(deadline), int(priority), int(time_needed), float(predicted_time_slot), description))
-                tasks_listbox.insert(tk.END, f"Task {task_id}: {description} | Time Needed: {format_time_slot(float(time_needed))} | Predicted Time Slot: {format_time_slot(float(predicted_time_slot))}")
+                tasks.append((int(task_id), int(deadline), int(priority), int(time_needed), float(predicted_time_slot),
+                              description))
+                tasks_listbox.insert(tk.END,
+                                     f"Task {task_id}: {description} | Time Needed: {format_time_slot(float(time_needed))} | Predicted Time Slot: {format_time_slot(float(predicted_time_slot))}")
+
 
 def save_availability_to_file():
     with open(AVAILABILITY_CSV, 'w', newline='') as file:
@@ -290,6 +313,7 @@ def save_availability_to_file():
         writer.writerow(['Day', 'Availability'])
         for day, hours in daily_availability.items():
             writer.writerow([day, hours])
+
 
 def load_availability_from_file():
     global daily_availability
@@ -301,18 +325,23 @@ def load_availability_from_file():
                 day, hours = row
                 daily_availability[day] = int(hours)
 
+
 def open_availability_window():
     availability_window = tk.Toplevel(root)
     availability_window.title("Set Weekly Availability")
 
-    tk.Label(availability_window, text="Day of the Week", font=("Helvetica", 12, "bold")).grid(row=0, column=0, padx=15, pady=10, sticky=tk.W)
-    tk.Label(availability_window, text="Availability (Hours)", font=("Helvetica", 12, "bold")).grid(row=0, column=1, padx=15, pady=10, sticky=tk.W)
+    tk.Label(availability_window, text="Day of the Week", font=("Helvetica", 12, "bold")).grid(row=0, column=0, padx=15,
+                                                                                               pady=10, sticky=tk.W)
+    tk.Label(availability_window, text="Availability (Hours)", font=("Helvetica", 12, "bold")).grid(row=0, column=1,
+                                                                                                    padx=15, pady=10,
+                                                                                                    sticky=tk.W)
 
     availability_entries = {}
     for i, day in enumerate(DAYS_OF_WEEK):
-        tk.Label(availability_window, text=day, font=("Helvetica", 10)).grid(row=i+1, column=0, padx=15, pady=10, sticky=tk.W)
+        tk.Label(availability_window, text=day, font=("Helvetica", 10)).grid(row=i + 1, column=0, padx=15, pady=10,
+                                                                             sticky=tk.W)
         entry = tk.Entry(availability_window, width=35)
-        entry.grid(row=i+1, column=1, padx=15, pady=10)
+        entry.grid(row=i + 1, column=1, padx=15, pady=10)
         if day in daily_availability:
             entry.insert(0, daily_availability[day])
         availability_entries[day] = entry
@@ -337,6 +366,7 @@ def open_availability_window():
 
     tk.Button(availability_window, text='Save', command=save_availability).grid(row=8, column=0, columnspan=2, pady=15)
 
+
 # Tkinter UI setup
 root = tk.Tk()
 root.title("Smart Activity Planner")
@@ -346,8 +376,11 @@ tk.Label(root, text="Deadline").grid(row=1, column=0, padx=15, pady=10, sticky=t
 tk.Label(root, text="Priority").grid(row=2, column=0, padx=15, pady=10, sticky=tk.W)
 tk.Label(root, text="Time Needed for Task (hours)").grid(row=3, column=0, padx=15, pady=10, sticky=tk.W)
 
+# Calculate the date for one day after the current date
+min_date = datetime.today() + timedelta(days=1)
+
 description_entry = tk.Entry(root, width=35)
-deadline_entry = DateEntry(root, width=33, background='darkblue', foreground='white', borderwidth=2)
+deadline_entry = DateEntry(root, width=33, background='darkblue', foreground='white', borderwidth=2, mindate=min_date)
 priority_combobox = ttk.Combobox(root, values=list(PRIORITY_MAP.keys()), width=33)
 time_needed_entry = tk.Entry(root, width=35)
 
@@ -373,12 +406,16 @@ tasks_scrollbar_y.config(command=tasks_listbox.yview)
 tasks_scrollbar_x.config(command=tasks_listbox.xview)
 
 tk.Button(root, text='Add Task', command=add_task).grid(row=5, column=0, sticky=tk.W, pady=15, padx=15)
-tk.Button(root, text='Set Availability', command=open_availability_window).grid(row=5, column=1, sticky=tk.W, pady=15, padx=15)
-tk.Button(root, text='Generate Schedule', command=generate_daily_schedule).grid(row=5, column=1, sticky=tk.E, pady=15, padx=15)
+tk.Button(root, text='Set Availability', command=open_availability_window).grid(row=5, column=1, sticky=tk.W, pady=15,
+                                                                                padx=15)
+tk.Button(root, text='Generate Schedule', command=generate_daily_schedule).grid(row=5, column=1, sticky=tk.E, pady=15,
+                                                                                padx=15)
 tk.Button(root, text='Quit', command=root.quit).grid(row=5, column=2, sticky=tk.E, pady=15, padx=15)
+
 
 def show_context_menu(event):
     context_menu.tk_popup(event.x_root, event.y_root)
+
 
 context_menu = tk.Menu(root, tearoff=0)
 context_menu.add_command(label="Modify Task", command=modify_task)
